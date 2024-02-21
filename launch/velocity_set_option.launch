@@ -1,0 +1,87 @@
+<!-- -->
+<launch>
+  <arg name="use_crosswalk_detection" default="true" />
+  <arg name="points_topic" default="points_no_ground" />
+  <arg name="decelerate_vel_min" default="1.3" />
+  <arg name="remove_points_upto" default="2.3" />
+  <arg name="enable_multiple_crosswalk_detection" default="true" />
+  <arg name="stop_distance_obstacle" default="10.0" />
+  <arg name="stop_distance_stopline" default="5.0" />
+  <arg name="detection_range" default="1.3" />
+  <arg name="points_threshold" default="10" />
+  <arg name="detection_height_top" default="0.2" />
+  <arg name="detection_height_bottom" default="-1.7" />
+  <arg name="acceleration" default="0.8" />
+  <arg name="accel_velocity" default="0.8" />
+  <arg name="min_accel_velocity" default="1.5" />
+  <arg name="deceleration_obstacle" default="0.8" />
+  <arg name="deceleration_stopline" default="0.6" />
+  <arg name="velocity_change_limit" default="9.972" />
+  <arg name="deceleration_range" default="0" />
+  <arg name="temporal_waypoints_size" default="100" />
+  <arg name="use_ll2" default="false" />
+  <!-- use radar-based gap controller -->
+  <arg name="use_fcr" default="false" />
+  <arg name="radar_topic" default="/radar_fc/raw" />
+  <arg name="desired_time_gap" default="2.0" />
+
+<group if="$(arg use_ll2)">
+
+  <node pkg="waypoint_planner" type="velocity_set_lanelet2" name="velocity_set" output="screen">
+    <param name="use_crosswalk_detection" value="$(arg use_crosswalk_detection)" />
+    <param name="enable_multiple_crosswalk_detection" value="$(arg enable_multiple_crosswalk_detection)" />
+    <param name="points_topic" value="$(arg points_topic)" />
+    <param name="decelerate_vel_min" value="$(arg decelerate_vel_min)" />
+    <param name="remove_points_upto" value="$(arg remove_points_upto)" />
+    <param name="stop_distance_obstacle" value="$(arg stop_distance_obstacle)" />
+    <param name="stop_distance_stopline" value="$(arg stop_distance_stopline)" />
+    <param name="detection_range" value="$(arg detection_range)" />
+    <param name="points_threshold" value="$(arg points_threshold)" />
+    <param name="detection_height_top" value="$(arg detection_height_top)" />
+    <param name="detection_height_bottom" value="$(arg detection_height_bottom)" />
+    <param name="acceleration" value="$(arg acceleration)" />
+    <param name="accel_velocity" value="$(arg accel_velocity)" />
+    <param name="min_accel_velocity" value="$(arg min_accel_velocity)" />
+    <param name="deceleration_obstacle" value="$(arg deceleration_obstacle)" />
+    <param name="deceleration_stopline" value="$(arg deceleration_stopline)" />
+    <param name="velocity_change_limit" value="$(arg velocity_change_limit)" />
+    <param name="deceleration_range" value="$(arg deceleration_range)" />
+    <param name="temporal_waypoints_size" value="$(arg temporal_waypoints_size)" />
+    <param name="use_fcr" value="$(arg use_fcr)" />
+    <param name="radar_topic" value="$(arg radar_topic)" />
+    <param name="desired_time_gap" value="$(arg desired_time_gap)" />
+
+  </node>
+</group>
+
+<group unless="$(arg use_ll2)">
+
+  <node pkg="waypoint_planner" type="velocity_set" name="velocity_set" output="screen">
+    <param name="use_crosswalk_detection" value="$(arg use_crosswalk_detection)" />
+    <param name="enable_multiple_crosswalk_detection" value="$(arg enable_multiple_crosswalk_detection)" />
+    <param name="points_topic" value="$(arg points_topic)" />
+    <param name="decelerate_vel_min" value="$(arg decelerate_vel_min)" />
+    <param name="remove_points_upto" value="$(arg remove_points_upto)" />
+    <param name="stop_distance_obstacle" value="$(arg stop_distance_obstacle)" />
+    <param name="stop_distance_stopline" value="$(arg stop_distance_stopline)" />
+    <param name="detection_range" value="$(arg detection_range)" />
+    <param name="points_threshold" value="$(arg points_threshold)" />
+    <param name="detection_height_top" value="$(arg detection_height_top)" />
+    <param name="detection_height_bottom" value="$(arg detection_height_bottom)" />
+    <param name="acceleration" value="$(arg acceleration)" />
+    <param name="accel_velocity" value="$(arg accel_velocity)" />
+    <param name="min_accel_velocity" value="$(arg min_accel_velocity)" />
+    <param name="deceleration_obstacle" value="$(arg deceleration_obstacle)" />
+    <param name="deceleration_stopline" value="$(arg deceleration_stopline)" />
+    <param name="velocity_change_limit" value="$(arg velocity_change_limit)" />
+    <param name="deceleration_range" value="$(arg deceleration_range)" />
+    <param name="temporal_waypoints_size" value="$(arg temporal_waypoints_size)" />
+    <param name="lead_speed_read" value="$(arg lead_speed_read)" />
+    <param name="lead_speed_topic" value="$(arg lead_speed_topic)" />
+    <param name="use_fcr" value="$(arg use_fcr)" />
+    <param name="radar_topic" value="$(arg radar_topic)" />
+    <param name="desired_time_gap" value="$(arg desired_time_gap)" />
+  </node>
+</group>
+
+</launch>
