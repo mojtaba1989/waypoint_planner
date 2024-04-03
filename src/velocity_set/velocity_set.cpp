@@ -537,13 +537,15 @@ int main(int argc, char** argv)
   bool enable_crosswalk_detection;
   bool enable_multiple_crosswalk_detection;
   std::string points_topic;
-  std::string radar_topic; 
+  std::string avp_topic; 
+  std::string avp_command_topic; 
 
   private_nh.param<double>("update_rate", update_rate, 10.0);
   private_nh.param<bool>("use_crosswalk_detection", enable_crosswalk_detection, true);
   private_nh.param<bool>("enable_multiple_crosswalk_detection", enable_multiple_crosswalk_detection, true);
   private_nh.param<std::string>("points_topic", points_topic, "points_lanes");
-  private_nh.param<std::string>("radar_topic", radar_topic, "/radar_fc/raw");
+  private_nh.param<std::string>("avp_topic", avp_topic, "/lead_vehicle/track");
+  private_nh.param<std::string>("avp_command_topic", avp_command_topic, "/lead_vehicle/command");
   
 
   CrossWalk crosswalk;
@@ -554,7 +556,8 @@ int main(int argc, char** argv)
   ros::Subscriber waypoints_sub = nh.subscribe("safety_waypoints", 1, &VelocitySetPath::waypointsCallback, &vs_path);
   ros::Subscriber current_vel_sub =
     nh.subscribe("current_velocity", 1, &VelocitySetPath::currentVelocityCallback, &vs_path);
-  ros::Subscriber lead_speed_sub = nh.subscribe(radar_topic, 1, &VelocitySetPath::radarSpeedReadCallback, &vs_path);
+  ros::Subscriber avp_sub = nh.subscribe(avp_topic, 1, &VelocitySetPath::avpSpeedReadCallback, &vs_path);
+  ros::Subscriber avp_command_path_sub = nh.subscribe(avp_command_topic, 1, &VelocitySetPath::avpCommandCallback, &vs_path);
 
   // velocity set info subscriber
   ros::Subscriber config_sub = nh.subscribe("config/velocity_set", 1, &VelocitySetInfo::configCallback, &vs_info);
@@ -565,6 +568,7 @@ int main(int argc, char** argv)
   ros::Subscriber control_pose_sub = nh.subscribe("current_pose", 1, &VelocitySetInfo::controlPoseCallback, &vs_info);
   ros::Subscriber detectionresult_sub = nh.subscribe("/state/stopline_wpidx", 1,
                                                         &VelocitySetInfo::detectionCallback, &vs_info);
+  ros::Subscriber avp_command_info_sub = nh.subscribe(avp_command_topic, 1, &VelocitySetInfo::avpCommandCallback, &vs_info);                                                       
 
   // vector map subscribers
   if (enable_crosswalk_detection)

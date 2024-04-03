@@ -15,6 +15,7 @@
  */
 
 #include <waypoint_planner/velocity_set/velocity_set_info.h>
+#include <apsrc_msgs/AvpCommand.h>
 
 VelocitySetInfo::VelocitySetInfo()
 {
@@ -35,7 +36,6 @@ VelocitySetInfo::VelocitySetInfo()
   private_nh_.param<double>("velocity_change_limit", vel_change_limit_kph, 9.972);
   private_nh_.param<double>("deceleration_range", deceleration_range_, 0);
   private_nh_.param<double>("temporal_waypoints_size", temporal_waypoints_size_, 100.0);
-
   velocity_change_limit_ = vel_change_limit_kph / 3.6;  // kph -> mps
 
   health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh, private_nh_);
@@ -112,4 +112,11 @@ void VelocitySetInfo::setLocalizerPose(geometry_msgs::TransformStamped *map_to_l
     lidarPose.orientation = map_to_lidar_tf->transform.rotation;
 
     localizer_pose_ = lidarPose;
+}
+
+void VelocitySetInfo::avpCommandCallback(const apsrc_msgs::AvpCommandConstPtr& msg)
+{
+  if (msg->stop_distance >= 5){
+    stop_distance_obstacle_ = msg->stop_distance;  
+  }
 }

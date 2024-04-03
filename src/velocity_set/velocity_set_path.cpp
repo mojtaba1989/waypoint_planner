@@ -236,6 +236,7 @@ void VelocitySetPath::changeWaypointsForStopping(int stop_waypoint, int obstacle
   {
     return;
   }
+  double ref_vel = calcStopPointVal(deceleration, stop_distance);
 
   // decelerate with constant deceleration
   for (int index = stop_waypoint; index >= closest_waypoint; index--)
@@ -244,10 +245,8 @@ void VelocitySetPath::changeWaypointsForStopping(int stop_waypoint, int obstacle
     {
       continue;
     }
-
     // v = (v0)^2 + 2ax, and v0 = 0
     std::array<int, 2> range = {index, stop_waypoint};
-    const double ref_vel = calcStopPointVal(deceleration, stop_distance);
     const double changed_vel = calcChangedVelocity(ref_vel, deceleration, range);
     const double prev_vel = original_waypoints_.waypoints[index].twist.twist.linear.x;
     const int sgn = (prev_vel < 0) ? -1 : 1;
@@ -303,10 +302,18 @@ void VelocitySetPath::resetFlag()
 
 double VelocitySetPath::calcStopPointVal(double deceleration, int stop_distance)
 {
-  if (use_fcr_)
+  if (use_fcr_ && avp_command_.enable)
   {
-    double target_vel = (lead_speed_ > 3) ? lead_speed_ : 0.0;
-    double ref_vel = target_vel * target_vel + 2 * deceleration * (stop_distance - desired_time_gap_ * current_vel_);
+    double target_vel = (lead_.speed > avp_command_.min_acceptable_speed) ? lead_.speed : 0.0;
+    if (avp_command_.smooth_enb && std::abs(target_vel - avp_command_.current_target_speed) > avp_command_.accl){
+      if (target_vel > avp_command_.current_target_speed){
+        avp_command_.current_target_speed += avp_command_.accl;
+      } else {
+        avp_command_.current_target_speed -= avp_command_.accl;
+      }
+    }
+    double ref_vel = avp_command_.current_target_speed * avp_command_.current_target_speed +
+                       2 * deceleration * (stop_distance - desired_time_gap_ * current_vel_);
     ref_vel = ref_vel > 0 ? std::sqrt(ref_vel) : 0.0;
     return ref_vel;
   } else {
@@ -328,7 +335,17 @@ void VelocitySetPath::currentVelocityCallback(const geometry_msgs::TwistStampedC
   current_vel_ = msg->twist.linear.x;
 }
 
-void VelocitySetPath::radarSpeedReadCallback(const  apsrc_msgs::EsrValid::ConstPtr& msg)
+void VelocitySetPath::avpSpeedReadCallback(const apsrc_msgs::LeadVehicleConstPtr& msg)
 {
-  lead_speed_ = current_vel_ + msg->lr_range_rate;
+  lead_ = *msg;
+}
+
+void VelocitySetPath::avpCommandCallback(const apsrc_msgs::AvpCommandConstPtr& msg)
+{
+  avp_command_.enable = msg->lead_speed_based_ctr_enb;
+  avp_command_.smooth_enb = msg->smooth_change_enb;
+  avp_command_.accl = msg->vel_change_step;
+  if (msg->time_gap > .9){
+    desired_time_gap_ = msg->time_gap;
+  }
 }

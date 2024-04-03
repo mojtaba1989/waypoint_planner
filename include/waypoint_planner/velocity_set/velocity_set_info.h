@@ -22,6 +22,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Int32.h>
 #include <tf2_ros/transform_listener.h>
+#include <apsrc_msgs/AvpCommand.h>
 
 #include <autoware_config_msgs/ConfigVelocitySet.h>
 
@@ -53,7 +54,7 @@ class VelocitySetInfo
   geometry_msgs::PoseStamped current_pose_;  // pose of base_link
 
   std::shared_ptr<autoware_health_checker::HealthChecker> health_checker_ptr_;
-
+  
   public:
   VelocitySetInfo();
   ~VelocitySetInfo() = default;
@@ -64,6 +65,7 @@ class VelocitySetInfo
   void controlPoseCallback(const geometry_msgs::PoseStampedConstPtr &msg);
   void detectionCallback(const std_msgs::Int32 &msg);
   void setLocalizerPose(geometry_msgs::TransformStamped *transformStamped);
+  void avpCommandCallback(const apsrc_msgs::AvpCommandConstPtr& msg);
 
   void clearPoints();
 

@@ -18,8 +18,18 @@
 #define WAYPOINT_PLANNER_VELOCITY_SET_VELOCITY_SET_PATH_H
 
 #include <autoware_msgs/Lane.h>
-#include <apsrc_msgs/EsrValid.h>
+#include <apsrc_msgs/LeadVehicle.h>
+#include <apsrc_msgs/AvpCommand.h>
 #include <libwaypoint_follower/libwaypoint_follower.h>
+
+struct avp_command_t{
+  bool enable = false;
+  bool smooth_enb = false;
+  double accl;
+  double current_target_speed = 0;
+  double time_gap = 2.0;
+  double min_acceptable_speed = 1;
+};
 
 class VelocitySetPath
 {
@@ -31,11 +41,7 @@ private:
   double current_vel_{0.0};
   double target_vel_{0.0};
   uint8_t target_vel_conf_{0};
-  geometry_msgs::Pose closest_path_pose_;
-  bool use_fcr_{false};                         // enable radar based control
-  double lead_speed_{0.0};                      // lead vehicle speed estimation
-  double desired_time_gap_{2.0};                // desired time gap based on ego speed
-  
+  geometry_msgs::Pose closest_path_pose_;  
 
   // ROS param
   double min_accel_velocity_;  // m/s
@@ -43,6 +49,12 @@ private:
   float accel_velocity_;       // m/s
 
   bool checkWaypoint(int wp_num) const;
+
+  // AVP param 
+  bool use_fcr_{false};                         // enable radar based control
+  apsrc_msgs::LeadVehicle lead_{};              // lead vehicle speed estimation
+  avp_command_t avp_command_{};                 // avp real time config
+  double desired_time_gap_{2.0};                // desired time gap based on ego speed
 
 public:
   VelocitySetPath();
@@ -62,7 +74,9 @@ public:
   // ROS Callbacks
   void waypointsCallback(const autoware_msgs::LaneConstPtr& msg);
   void currentVelocityCallback(const geometry_msgs::TwistStampedConstPtr& msg);
-  void radarSpeedReadCallback(const  apsrc_msgs::EsrValid::ConstPtr& msg);
+  void avpSpeedReadCallback(const  apsrc_msgs::LeadVehicleConstPtr& msg);
+  void avpCommandCallback(const apsrc_msgs::AvpCommandConstPtr& msg);
+
 
   double distanceBetweenWaypoints(const int& begin, const int& end) const;
   double distanceBetweenPoints(const geometry_msgs::Point& begin, const geometry_msgs::Point& end) const;
