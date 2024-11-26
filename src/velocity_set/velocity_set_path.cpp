@@ -304,7 +304,7 @@ double VelocitySetPath::calcStopPointVal(double deceleration, int stop_distance)
 {
   if (use_fcr_ && avp_command_.enable)
   {
-    double target_vel = (lead_.speed > avp_command_.min_acceptable_speed) ? lead_.speed : 0.0;
+    double target_vel = (lead_.speed_mps > avp_command_.min_acceptable_speed) ? lead_.speed_mps : 0.0;
     if (avp_command_.smooth_enb && std::abs(target_vel - avp_command_.current_target_speed) > avp_command_.accl){
       if (target_vel > avp_command_.current_target_speed){
         avp_command_.current_target_speed += avp_command_.accl;
