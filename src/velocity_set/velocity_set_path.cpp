@@ -304,16 +304,8 @@ double VelocitySetPath::calcStopPointVal(double deceleration, int stop_distance)
 {
   if (use_fcr_ && avp_command_.enable)
   {
-    double target_vel = (lead_.speed > avp_command_.min_acceptable_speed) ? lead_.speed : 0.0;
-    if (avp_command_.smooth_enb && std::abs(target_vel - avp_command_.current_target_speed) > avp_command_.accl){
-      if (target_vel > avp_command_.current_target_speed){
-        avp_command_.current_target_speed += avp_command_.accl;
-      } else {
-        avp_command_.current_target_speed -= avp_command_.accl;
-      }
-    }
-    double ref_vel = avp_command_.current_target_speed * avp_command_.current_target_speed +
-                       2 * deceleration * (stop_distance - desired_time_gap_ * current_vel_);
+    double target_vel = (lead_.speed_mps > avp_command_.min_acceptable_speed) ? lead_.speed_mps : 0.0;
+    double ref_vel = target_vel * target_vel + 2 * deceleration * (stop_distance - desired_time_gap_ * current_vel_);
     ref_vel = ref_vel > 0 ? std::sqrt(ref_vel) : 0.0;
     return ref_vel;
   } else {
@@ -343,7 +335,8 @@ void VelocitySetPath::avpSpeedReadCallback(const apsrc_msgs::LeadVehicleConstPtr
 void VelocitySetPath::avpCommandCallback(const apsrc_msgs::AvpCommandConstPtr& msg)
 {
   avp_command_.enable = msg->lead_speed_based_ctr_enb;
-  avp_command_.smooth_enb = msg->smooth_change_enb;
+  avp_command_.smooth_enb = false;
+  // avp_command_.smooth_enb = msg->smooth_change_enb;
   avp_command_.accl = msg->vel_change_step;
   if (msg->time_gap > .9){
     desired_time_gap_ = msg->time_gap;
